@@ -1314,7 +1314,7 @@ namespace PetriEngine {
         return continueReductions;
     }
 
-    bool Reducer::ReducebyRuleH(uint32_t* placeInQuery, bool all_ltl)
+    bool Reducer::ReducebyRuleH(uint32_t* placeInQuery, bool all_reach, bool all_ltl)
     {
         if(reconstructTrace)
             return false; // we don't know where in the loop the tokens are needed
@@ -1351,7 +1351,7 @@ namespace PetriEngine {
             return 1;
         };
 
-        auto removeLoop = [this,placeInQuery,all_ltl](std::vector<uint32_t>& loop) -> bool {
+        auto removeLoop = [this,placeInQuery,all_reach,all_ltl](std::vector<uint32_t>& loop) -> bool {
             size_t i = 0;
             for(; i < loop.size(); ++i)
                 if(loop[i] == loop.back())
@@ -1360,6 +1360,19 @@ namespace PetriEngine {
             assert(_tflags[loop.back()]== 1);
             if(i == loop.size() - 1)
                 return false;
+
+            if(!all_reach)
+            {
+                // merging p1 and p2 lets a token in p2 use the consumers of p1
+                // without travelling the rest of the loop. Reachability cannot
+                // see the route, but LTL and CTL can if it passes a place in the
+                // query, so then the merge adds paths that skip that place.
+                for(size_t j = i; j < loop.size() - 1; ++j)
+                {
+                    if(placeInQuery[parent->_transitions[loop[j]].pre[0].place] > 0)
+                        return false;
+                }
+            }
 
             auto p1 = parent->_transitions[loop[i]].pre[0].place;
             bool removed = false;
@@ -2854,7 +2867,7 @@ namespace PetriEngine {
                 {
                     while(ReducebyRuleA(context.getQueryPlaceCount())) changed = true;
                     while(ReducebyRuleD(context.getQueryPlaceCount(), all_reach, false)) changed = true;
-                    while(ReducebyRuleH(context.getQueryPlaceCount(), all_ltl)) changed = true;
+                    while(ReducebyRuleH(context.getQueryPlaceCount(), all_reach, all_ltl)) changed = true;
                 }
             }
         }
@@ -2891,7 +2904,7 @@ restart:
                 if(!contains_next && !changed)
                 {
                     // Only try RuleH last. It can reduce applicability of other rules.
-                    while (ReducebyRuleH(context.getQueryPlaceCount(), all_ltl)) changed = true;
+                    while (ReducebyRuleH(context.getQueryPlaceCount(), all_reach, all_ltl)) changed = true;
                     while (ReducebyRuleS(context.getQueryPlaceCount(), all_reach, remove_loops, all_reach, explosion_limiter)) changed = true;
                     if(all_ltl && !changed) // ruleR is a last resort
                         changed = ReducebyRuleR(context.getQueryPlaceCount(), explosion_limiter);
@@ -2965,7 +2978,7 @@ restart:
                             while(ReducebyRuleG(context.getQueryPlaceCount(), remove_loops, all_reach)) changed = true;
                             break;
                         case 7:
-                            while(ReducebyRuleH(context.getQueryPlaceCount(), all_ltl)) changed = true;
+                            while(ReducebyRuleH(context.getQueryPlaceCount(), all_reach, all_ltl)) changed = true;
                             break;
                         case 8:
                             while(ReducebyRuleI(context.getQueryPlaceCount(), all_reach)) changed = true;

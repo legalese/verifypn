@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<property-set xmlns="http://mcc.lip6.fr/">
+  <property>
+    <id>rule_H-LTLCardinality-00</id>
+    <description>Every path marks s1: the token cannot stay in s0 or s2 for ever.</description>
+    <formula>
+      <all-paths>
+        <finally>
+          <integer-le>
+            <integer-constant>1</integer-constant>
+            <tokens-count>
+              <place>s1</place>
+            </tokens-count>
+          </integer-le>
+        </finally>
+      </all-paths>
+    </formula>
+  </property>
+  <property>
+    <id>rule_H-LTLFireability-01</id>
+    <description>Every path enables go1, which needs the token in s1.</description>
+    <formula>
+      <all-paths>
+        <finally>
+          <is-fireable>
+            <transition>go1</transition>
+          </is-fireable>
+        </finally>
+      </all-paths>
+    </formula>
+  </property>
+</property-set>

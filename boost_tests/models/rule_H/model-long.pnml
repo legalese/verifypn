@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<pnml xmlns="http://www.pnml.org/version-2009/grammar/pnml">
+  <net id="rule_H_long" type="http://www.pnml.org/version-2009/grammar/ptnet">
+    <name><text>rule_H_long</text></name>
+    <page id="page0">
+      <place id="p1"><name><text>p1</text></name></place>
+      <place id="p2"><name><text>p2</text></name><initialMarking><text>1</text></initialMarking></place>
+      <place id="p3"><name><text>p3</text></name></place>
+      <place id="p4"><name><text>p4</text></name></place>
+      <place id="s1"><name><text>s1</text></name></place>
+      <place id="p5"><name><text>p5</text></name></place>
+      <transition id="t12"><name><text>t12</text></name></transition>
+      <transition id="t23"><name><text>t23</text></name></transition>
+      <transition id="t34"><name><text>t34</text></name></transition>
+      <transition id="go1"><name><text>go1</text></name></transition>
+      <transition id="t45"><name><text>t45</text></name></transition>
+      <transition id="t51"><name><text>t51</text></name></transition>
+      <transition id="wait"><name><text>wait</text></name></transition>
+      <arc id="a0" source="p1" target="t12"/>
+      <arc id="a1" source="t12" target="p2"/>
+      <arc id="a2" source="p2" target="t23"/>
+      <arc id="a3" source="t23" target="p3"/>
+      <arc id="a4" source="p3" target="t34"/>
+      <arc id="a5" source="t34" target="p4"/>
+      <arc id="a6" source="p4" target="t45"/>
+      <arc id="a7" source="t45" target="s1"/>
+      <arc id="a8" source="s1" target="go1"/>
+      <arc id="a9" source="go1" target="p5"/>
+      <arc id="a10" source="p5" target="t51"/>
+      <arc id="a11" source="t51" target="p1"/>
+      <arc id="a12" source="p1" target="wait"/>
+      <arc id="a13" source="wait" target="p1"/>
+    </page>
+  </net>
+</pnml>

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<pnml xmlns="http://www.pnml.org/version-2009/grammar/pnml">
+  <net id="rule_H" type="http://www.pnml.org/version-2009/grammar/ptnet">
+    <name><text>rule_H</text></name>
+    <page id="page0">
+      <place id="s0"><name><text>s0</text></name><initialMarking><text>1</text></initialMarking></place>
+      <place id="s1"><name><text>s1</text></name></place>
+      <place id="s2"><name><text>s2</text></name></place>
+      <transition id="go0"><name><text>go0</text></name></transition>
+      <transition id="go1"><name><text>go1</text></name></transition>
+      <transition id="go2"><name><text>go2</text></name></transition>
+      <transition id="wait"><name><text>wait</text></name></transition>
+      <arc id="a0" source="s0" target="go0"/>
+      <arc id="a1" source="go0" target="s1"/>
+      <arc id="a2" source="s1" target="go1"/>
+      <arc id="a3" source="go1" target="s2"/>
+      <arc id="a4" source="s2" target="go2"/>
+      <arc id="a5" source="go2" target="s0"/>
+      <arc id="a6" source="s2" target="wait"/>
+      <arc id="a7" source="wait" target="s2"/>
+    </page>
+  </net>
+</pnml>

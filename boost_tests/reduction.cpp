@@ -124,6 +124,41 @@ BOOST_AUTO_TEST_CASE(ruleD3, * utf::timeout(60)) {
     }
 }
 
+BOOST_AUTO_TEST_CASE(ruleHLoopThroughQueryPlace, * utf::timeout(60)) {
+
+    // A loop of single-arc transitions passes through the query place s1.
+    // Merging the other places of the loop must not let the token skip s1.
+    const std::set<size_t> qnums{0, 1};
+    const std::vector<Reachability::ResultPrinter::Result> expected{
+        Reachability::ResultPrinter::Satisfied,
+        Reachability::ResultPrinter::Satisfied};
+    for(auto model : {"/models/rule_H/model.pnml", "/models/rule_H/model-long.pnml"})
+    {
+        for(size_t rmode : {0,1})
+        {
+            std::vector<Reachability::ResultPrinter::Result> results{
+                Reachability::ResultPrinter::Unknown,
+                Reachability::ResultPrinter::Unknown};
+
+            auto [conditions, builder, qstrings, trans_names, place_names] = load_builder(model,
+                "/models/rule_H/LTL.xml", qnums);
+            std::vector<uint32_t> reds;
+            std::unique_ptr<PetriNet> net{builder.makePetriNet(false)};
+            contextAnalysis(false, trans_names, place_names, builder, net.get(), conditions);
+            builder.reduce(conditions, results, rmode, false, net.get(), 10, reds);
+            net.reset(builder.makePetriNet(false));
+            contextAnalysis(false, trans_names, place_names, builder, net.get(), conditions);
+
+            for (size_t i = 0; i < conditions.size(); ++i) {
+                LTL::LTLSearch search(*net, conditions.at(i), LTL::BuchiOptimization::Low, LTL::APCompression::None);
+                auto r = search.solve(false, 0, LTL::Algorithm::Tarjan,  LTL::LTLPartialOrder::None, Strategy::DFS, LTL::LTLHeuristic::DFS, true);
+                auto result = r ? ResultPrinter::Satisfied : ResultPrinter::NotSatisfied;
+                BOOST_REQUIRE_EQUAL(expected.at(i), result);
+            }
+        }
+    }
+}
+
 BOOST_AUTO_TEST_CASE(ruleGFail, * utf::timeout(60)) {
 
     const std::set<size_t> qnums{0};
