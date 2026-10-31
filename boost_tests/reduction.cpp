@@ -159,6 +159,51 @@ BOOST_AUTO_TEST_CASE(ruleHLoopThroughQueryPlace, * utf::timeout(60)) {
     }
 }
 
+BOOST_AUTO_TEST_CASE(ruleHLoopThroughQueryPlaceCTL, * utf::timeout(60)) {
+
+    // The same loop through s1 with CTL queries that are not LTL formulas.
+    // The weight-2 self-loops on the other places keep rule B from removing
+    // them first, so rule H is what sees the loop. The net is loaded as
+    // verifypn loads it (queries translated to CTL, no reordered net built
+    // before the reduction): loaded through load_builder, the reduction came
+    // out differently and a rule H without the CTL check passed this test.
+    const std::set<size_t> qnums{0, 1};
+    const std::vector<Reachability::ResultPrinter::Result> expected{
+        Reachability::ResultPrinter::Satisfied,
+        Reachability::ResultPrinter::Satisfied};
+    for(size_t rmode : {0,1})
+    {
+        std::vector<Reachability::ResultPrinter::Result> results{
+            Reachability::ResultPrinter::CTL,
+            Reachability::ResultPrinter::CTL};
+
+        shared_string_set sset;
+        ColoredPetriNetBuilder cpnBuilder(sset);
+        auto f = loadFile("/models/rule_H/model-long-w2.pnml");
+        cpnBuilder.parse_model(f);
+        auto [builder, trans_names, place_names, trace_mapper] = unfold(cpnBuilder, false, false, false, std::cerr, 10, 100, 10, 10, false);
+        builder.sort();
+        auto q = loadFile("/models/rule_H/CTL.xml");
+        std::vector<std::string> qstrings;
+        auto conditions = getCTLQueries(parseXMLQueries(sset, qstrings, q, qnums, false));
+
+        std::vector<uint32_t> reds;
+        std::unique_ptr<PetriNet> net{builder.makePetriNet(false)};
+        contextAnalysis(false, trans_names, place_names, builder, net.get(), conditions);
+        builder.reduce(conditions, results, rmode, false, nullptr, 10, reds);
+        net.reset(builder.makePetriNet());
+        contextAnalysis(false, trans_names, place_names, builder, net.get(), conditions);
+
+        for (size_t i = 0; i < conditions.size(); ++i) {
+            CTLResult cres(conditions[i].get());
+            auto p = PetriEngine::PQL::pushNegation(conditions[i]);
+            bool res = CTLSingleSolve(p.get(), net.get(), CTL::CZero, Strategy::DFS, false, cres);
+            auto result = res ? ResultPrinter::Satisfied : ResultPrinter::NotSatisfied;
+            BOOST_REQUIRE_EQUAL(expected.at(i), result);
+        }
+    }
+}
+
 BOOST_AUTO_TEST_CASE(ruleGFail, * utf::timeout(60)) {
 
     const std::set<size_t> qnums{0};
