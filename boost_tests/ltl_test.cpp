@@ -105,6 +105,29 @@ BOOST_AUTO_TEST_CASE(ExportedTraceCasesMatchNDFSAndTarjan) {
     }
 }
 
+BOOST_AUTO_TEST_CASE(ZeroPlacesDeadlock, * utf::timeout(60)) {
+    // A net without places, as left by reductions when the query only
+    // mentions deadlock; evaluating a guard must not divide by zero.
+    const std::set<size_t> qnums{0, 1};
+    const std::vector<Reachability::ResultPrinter::Result> expected{
+        ResultPrinter::NotSatisfied,
+        ResultPrinter::Satisfied};
+
+    auto [pn, conditions, qstrings] = load_pn("/models/zero_places.pnml",
+        "/models/zero_places.xml", qnums, TemporalLogic::LTL);
+    BOOST_REQUIRE_EQUAL(pn->numberOfPlaces(), 0);
+
+    for (auto i : qnums) {
+        for(auto strategy : { Strategy::DFS, Strategy::HEUR})
+        {
+            LTL::LTLSearch search(*pn, conditions[i], LTL::BuchiOptimization::Low, LTL::APCompression::None);
+            auto r = search.solve(false, 0, LTL::Algorithm::Tarjan, LTL::LTLPartialOrder::None, strategy, LTL::LTLHeuristic::DFS, true);
+            auto result = r ? ResultPrinter::Satisfied : ResultPrinter::NotSatisfied;
+            BOOST_REQUIRE_EQUAL(expected[i], result);
+        }
+    }
+}
+
 BOOST_AUTO_TEST_CASE(AngiogenesisPT01LTLCardinality, * utf::timeout(300)) {
 
     const std::set<size_t> qnums{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15};

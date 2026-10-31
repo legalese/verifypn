@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<property-set xmlns="http://mcc.lip6.fr/">
+  <property>
+    <id>zero_places-LTL-00</id>
+    <description>t0 needs no tokens, so the net never deadlocks.</description>
+    <formula>
+      <all-paths>
+        <finally>
+          <deadlock/>
+        </finally>
+      </all-paths>
+    </formula>
+  </property>
+  <property>
+    <id>zero_places-LTL-01</id>
+    <description>The same, as an existential property.</description>
+    <formula>
+      <exists-path>
+        <globally>
+          <negation>
+            <deadlock/>
+          </negation>
+        </globally>
+      </exists-path>
+    </formula>
+  </property>
+</property-set>

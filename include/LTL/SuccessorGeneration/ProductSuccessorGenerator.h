@@ -204,7 +204,10 @@ namespace LTL {
          */
         bool guard_valid(const PetriEngine::Structures::State &state, bdd bdd)
         {
-            PetriEngine::PQL::EvaluationContext ctx{state.marking(), &_net, _successor_generator.state_size() / _net.numberOfPlaces()};
+            // a net can be reduced to no places; it then has a single trace
+            const size_t places = _net.numberOfPlaces();
+            const size_t traces = places == 0 ? 1 : _successor_generator.state_size() / places;
+            PetriEngine::PQL::EvaluationContext ctx{state.marking(), &_net, traces};
             auto res = _buchi_succ_gen.automaton().guard_valid(ctx, bdd);
             return res;
         }
