@@ -1,0 +1,46 @@
+<?xml version="1.0"?>
+<property-set xmlns="http://mcc.lip6.fr/">
+  <property>
+    <id>rule_C-ReachabilityCardinality-00</id>
+    <description>t0 fires once before p3 inhibits it, so t1 fires at most once.</description>
+    <formula>
+      <exists-path>
+        <finally>
+          <integer-le>
+            <integer-constant>2</integer-constant>
+            <tokens-count>
+              <place>q</place>
+            </tokens-count>
+          </integer-le>
+        </finally>
+      </exists-path>
+    </formula>
+  </property>
+  <property>
+    <id>rule_C-ReachabilityCardinality-01</id>
+    <description>The same bound as an invariant.</description>
+    <formula>
+      <all-paths>
+        <globally>
+          <integer-le>
+            <tokens-count>
+              <place>q</place>
+            </tokens-count>
+            <integer-constant>1</integer-constant>
+          </integer-le>
+        </globally>
+      </all-paths>
+    </formula>
+  </property>
+  <property>
+    <id>rule_C-ReachabilityDeadlock-02</id>
+    <description>After t0 and t1 nothing is enabled.</description>
+    <formula>
+      <exists-path>
+        <finally>
+          <deadlock/>
+        </finally>
+      </exists-path>
+    </formula>
+  </property>
+</property-set>

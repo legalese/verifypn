@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<pnml xmlns="http://www.pnml.org/version-2009/grammar/pnml">
+  <net id="rule_C" type="http://www.pnml.org/version-2009/grammar/ptnet">
+    <name><text>rule_C</text></name>
+    <page id="page0">
+      <place id="p0"><name><text>p0</text></name><initialMarking><text>1</text></initialMarking></place>
+      <place id="p3"><name><text>p3</text></name></place>
+      <place id="q"><name><text>q</text></name></place>
+      <place id="u"><name><text>u</text></name></place>
+      <place id="r"><name><text>r</text></name></place>
+      <transition id="t0"><name><text>t0</text></name></transition>
+      <transition id="t1"><name><text>t1</text></name></transition>
+      <transition id="y"><name><text>y</text></name></transition>
+      <transition id="z"><name><text>z</text></name></transition>
+      <arc id="a1" source="p0" target="t0"/>
+      <arc id="a2" source="p3" target="t0" type="inhibitor"/>
+      <arc id="a3" source="t0" target="p0"/>
+      <arc id="a4" source="t0" target="p3"/>
+      <arc id="a5" source="p0" target="t1"/>
+      <arc id="a6" source="p3" target="t1"/>
+      <arc id="a7" source="t1" target="q"/>
+      <arc id="b1" source="u" target="y"/>
+      <arc id="b2" source="y" target="r"/>
+      <arc id="b3" source="r" target="z"/>
+      <arc id="b4" source="z" target="u"/>
+      <arc id="b5" source="z" target="p0"/>
+    </page>
+  </net>
+</pnml>

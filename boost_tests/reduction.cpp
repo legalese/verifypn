@@ -124,6 +124,51 @@ BOOST_AUTO_TEST_CASE(ruleD3, * utf::timeout(60)) {
     }
 }
 
+BOOST_AUTO_TEST_CASE(ruleCInhibitorKeptPlace, * utf::timeout(60)) {
+
+    // p0's consumers are a subset of p3's, but p3 only inhibits t0.
+    // Removing p0 lets t0 and t1 alternate for ever. The net is loaded as
+    // verifypn loads it, without building a reordered net before the
+    // reduction; loaded through load_builder, this test passed without the fix.
+    const std::set<size_t> qnums{0, 1, 2};
+    const std::vector<Reachability::ResultPrinter::Result> expected{
+        Reachability::ResultPrinter::NotSatisfied,
+        Reachability::ResultPrinter::Satisfied,
+        Reachability::ResultPrinter::Satisfied};
+    for(size_t rmode : {0,1})
+    {
+        std::vector<Reachability::ResultPrinter::Result> results{
+            Reachability::ResultPrinter::Unknown,
+            Reachability::ResultPrinter::Unknown,
+            Reachability::ResultPrinter::Unknown};
+
+        shared_string_set sset;
+        ColoredPetriNetBuilder cpnBuilder(sset);
+        auto f = loadFile("/models/rule_C/model.pnml");
+        cpnBuilder.parse_model(f);
+        auto [builder, trans_names, place_names, trace_mapper] = unfold(cpnBuilder, false, false, false, std::cerr, 10, 100, 10, 10, false);
+        builder.sort();
+        auto q = loadFile("/models/rule_C/queries.xml");
+        std::vector<std::string> qstrings;
+        auto conditions = getCTLQueries(parseXMLQueries(sset, qstrings, q, qnums, false));
+
+        std::vector<uint32_t> reds;
+        std::unique_ptr<PetriNet> net{builder.makePetriNet(false)};
+        contextAnalysis(false, trans_names, place_names, builder, net.get(), conditions);
+        builder.reduce(conditions, results, rmode, false, nullptr, 10, reds);
+        net.reset(builder.makePetriNet());
+        contextAnalysis(false, trans_names, place_names, builder, net.get(), conditions);
+
+        for (size_t i = 0; i < conditions.size(); ++i) {
+            CTLResult cres(conditions[i].get());
+            auto p = PetriEngine::PQL::pushNegation(conditions[i]);
+            bool res = CTLSingleSolve(p.get(), net.get(), CTL::CZero, Strategy::DFS, false, cres);
+            auto result = res ? ResultPrinter::Satisfied : ResultPrinter::NotSatisfied;
+            BOOST_REQUIRE_EQUAL(expected.at(i), result);
+        }
+    }
+}
+
 BOOST_AUTO_TEST_CASE(ruleGFail, * utf::timeout(60)) {
 
     const std::set<size_t> qnums{0};
